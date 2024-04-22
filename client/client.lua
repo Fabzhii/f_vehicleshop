@@ -11,12 +11,12 @@ Citizen.CreateThread(function()
     end 
 end)
 
-function createBlip(position, blip, label)
-    blip = AddBlipForCoord()position
-    SetBlipSprite(blip, blip.id)
+function createBlip(position, blipsetting, label)
+    local blip = AddBlipForCoord(position)
+    SetBlipSprite(blip, blipsetting.id)
     SetBlipDisplay(blip, 4)
-    SetBlipScale(blip,  blip.scale)
-    SetBlipColour(blip, blip.color)
+    SetBlipScale(blip,  blipsetting.scale)
+    SetBlipColour(blip, blipsetting.color)
     SetBlipAsShortRange(blip, true)
     BeginTextCommandSetBlipName("STRING")
     AddTextComponentString(label)
@@ -93,7 +93,8 @@ function openShop(shop, xGrade)
     for k,v in pairs(shop.categories) do 
         table.insert(categories, {
             label = v.label, 
-            values, args = getArguments(v.vehicles, xGrade), 
+            values = getArguments(v.vehicles, xGrade)[1],
+            args = getArguments(v.vehicles, xGrade)[2],
         })
     end 
 
@@ -114,10 +115,23 @@ function openShop(shop, xGrade)
         title = shop.label,
         position = shop.menu_position,
         onSideScroll = function(selected, scrollIndex, args)
+            Citizen.Wait(5)
+            DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+            Citizen.Wait(5)
+            local model = args[scrollIndex][1]
+            local vehicle = spawncar(model, shop.positions.inside, GetPlayerServerId(PlayerId()), shop.buy)
+            Citizen.Wait(5)
+            SetPedIntoVehicle(PlayerPedId(), vehicle, -1) 
             
         end,
         onSelected = function(selected, secondary, args)
-
+            Citizen.Wait(5)
+            DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+            Citizen.Wait(5)
+            local model = categories[selected].args[secondary][1]
+            local vehicle = spawncar(model, shop.positions.inside, GetPlayerServerId(PlayerId()), shop.buy)
+            Citizen.Wait(5)
+            SetPedIntoVehicle(PlayerPedId(), vehicle, -1) 
         end,
 
         onClose = function(keyPressed)
@@ -128,7 +142,52 @@ function openShop(shop, xGrade)
         end,
         options = categories,
     }, function(selected, scrollIndex, args)
-        print(selected, scrollIndex, args)
+        if ox_inventory:GetItemCount('money') >= args[scrollIndex][2] then 
+            local alert = lib.alertDialog({
+                header = GetLabelText(args[scrollIndex][1]),
+                content = (locales['buy_menu'][1]):format(args[scrollIndex][2]),
+                centered = true,
+                cancel = true,
+                labels = {
+                    cancel = locales['cancel'],
+                    confirm = locales['confirm'],
+                }
+            })
+            if alert == 'confirm' then 
+
+                local settings = GetSettings(shop)
+
+                local hex = settings[1]
+                local hex = hex:gsub("#","")
+                local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+
+
+                SetVehicleCustomPrimaryColour(GetVehiclePedIsIn(PlayerPedId(), false), r,g,b)
+                SetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false), settings[2])
+
+                local vehicleProps = ESX.Game.GetVehicleProperties(GetVehiclePedIsIn(PlayerPedId(), false))
+                local platetext = vehicleProps.plate
+                -- TriggerServerEvent('fvehicleshop:writesqlcar', vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
+                DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+                SetEntityCoords(PlayerPedId(), shop.positions.outside)
+                TriggerServerEvent('fvehicleshop:setBucket', GetPlayerServerId(PlayerId()))
+                canExit = true 
+                ESX.Game.SpawnVehicle(vehicleProps.model, shop.positions.outside, shop.positions.outside.w, function(vehicle)
+                    ESX.Game.SetVehicleProperties(vehicle, vehicleProps)
+                    SetPedIntoVehicle(PlayerPedId(), vehicle, -1) 
+                    Config.Notifcation(locales['bought'])
+                end)
+            else 
+                lib.hideMenu(false)
+                DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+                buyVehicles(marker, grade)
+            end 
+        else 
+            lib.hideMenu(false)
+            DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+            openShop(shop, xGrade)
+            Config.Notifcation(locales['no_money'])
+        end 
     end)
     lib.showMenu('f_vehicleshop')
 
@@ -157,21 +216,112 @@ function getArguments(vehicles, xGrade)
             end 
         end 
     end 
-    return(returnValues, returnArgs)
+
+
+    return({returnValues, returnArgs})
 end 
 
 RegisterNetEvent('fvehicleshop:openAdminUi')
 AddEventHandler('fvehicleshop:openAdminUi', function(playerData)
 
-
-    local input = lib.inputDialog('Dialog title', {
+    local input = lib.inputDialog(locales['configure'][1], {
         {type = 'select', label = locales['admin_player'][1], description = locales['admin_player'][2], options = playerData, required = true},
         {type = 'input', label = locales['admin_vehicle'][1], description = locales['admin_vehicle'][2], required = true},
         {type = 'input', label = locales['admin_plate'][1], description = locales['admin_plate'][2], required = true},
-        {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'rgb'},
+        {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'hex'},
         {type = 'checkbox', label = locales['admin_spawn'][1], description = locales['admin_spawn'][2]},
     })
     if input ~= nil then 
         
     end 
 end)
+
+function spawncar(car, pos, bucket, buySettings)
+    local ModelHash = car
+	if not IsModelInCdimage(ModelHash) then return end
+	RequestModel(ModelHash)
+	while not HasModelLoaded(ModelHash) do Wait(0) end
+	vehicle = CreateVehicle(ModelHash, pos, pos.w, true, false)
+    
+	SetModelAsNoLongerNeeded(ModelHash)
+    FreezeEntityPosition(vehicle, true)
+    SetVehicleNumberPlateText(vehicle, GenPlate(buySettings))
+	Citizen.Wait(30)
+    Entity(vehicle).state.fuel = 100
+	TriggerServerEvent('fvehicleshop:setEntityBucket', NetworkGetNetworkIdFromEntity(vehicle), bucket)
+	return(vehicle)
+end 
+
+function GenPlate(buySettings)
+    local plate = Config.DefaultPlate
+
+    if not buySettings.customizePlate then 
+        local split = split(buySettings.plate.format)
+        plate = ''
+        for k,v in pairs(split) do 
+            if v == '-' then 
+                plate = plate .. randomBuchstabe()
+            elseif v == '.' then
+                plate = plate .. randomZiffer()
+            else 
+                plate = plate .. v
+            end 
+        end 
+    end 
+    if IsPlateTaken(plate) and not (plate == Config.DefaultPlate)then 
+        return(GenPlate(buySettings))
+    end
+    return(plate)
+end 
+
+function split(str)
+    local buchstaben = {}
+
+    for i = 1, #str do
+        table.insert(buchstaben, str:sub(i, i))
+    end
+    return(buchstaben)
+end
+
+function randomBuchstabe()
+    local buchstaben = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    local randomIndex = math.random(1, #buchstaben)
+    return buchstaben:sub(randomIndex, randomIndex)
+end
+
+function randomZiffer()
+    local ziffern = "0123456789"
+    local randomIndex = math.random(1, #ziffern)
+    return ziffern:sub(randomIndex, randomIndex)
+end
+
+function IsPlateTaken(plate)
+	local p = promise.new()
+	ESX.TriggerServerCallback('fvehicleshop:isPlateTaken', function(isPlateTaken)
+        print(isPlateTaken)
+		p:resolve(isPlateTaken)
+	end, plate)
+	return Citizen.Await(p)
+end
+
+function GetSettings(shop)
+    local returnSettings = {}
+    if shop.buy.customizeColor or shop.buy.customizePlate then 
+        local settings = {}
+        if shop.buy.customizeColor then 
+            table.insert(settings, {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'hex'})
+        end 
+        if shop.buy.customizePlate then 
+            table.insert(settings, {type = 'input', label = locales['admin_plate'][1], description = locales['admin_plate'][2], required = true})
+        end 
+
+        local input = lib.inputDialog(locales['configure'][1], settings, {allowCancel = false})
+        returnSettings = input
+    end 
+
+    if IsPlateTaken(returnSettings[2]) then 
+        return(GetSettings(shop))
+        Config.Notifcation(locales['plate_exists'])
+    end
+    return(returnSettings)
+end 
