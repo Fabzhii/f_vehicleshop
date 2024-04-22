@@ -76,6 +76,7 @@ function canOpenShop(shop)
     end)
 end 
 
+local canExit = true 
 function openShop(shop, xGrade)
     local categories = {}
     for k,v in pairs(shop.categories) do 
@@ -85,6 +86,16 @@ function openShop(shop, xGrade)
             args = getArgs(v.vehicles, xGrade),
         })
     end 
+
+    SetEntityCoords(PlayerPedId(), shop.positions.inside)
+    canExit = false
+    Citizen.CreateThread(function()
+        while not canExit do 
+            DisableControlAction(0, 75, true)
+            Citizen.Wait(1)
+        end 
+    end) 
+
 
     lib.registerMenu({
         id = 'f_vehicleshop',
@@ -98,7 +109,10 @@ function openShop(shop, xGrade)
         end,
 
         onClose = function(keyPressed)
-
+            DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
+            TriggerServerEvent('fvehicleshop:setBucket', 0)
+            SetEntityCoords(PlayerPedId(), shop.positions.menu)
+            canExit = true 
         end,
         options = categories,
     }, function(selected, scrollIndex, args)
