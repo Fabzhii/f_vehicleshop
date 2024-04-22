@@ -57,25 +57,50 @@ end)
 function canOpenShop(shop)
     ESX.TriggerServerCallback('fvehicleshop:getJob', function(xJob, xGrade)
         if shop.allowedJobs == nil then 
-            openShop(shop)
+            openShop(shop, xGrade)
         end 
 
         if type(shop.allowedJobs) == 'string' then 
             if shop.allowedJobs == xJob then 
-                openShop(shop)
+                openShop(shop, xGrade)
             end 
         end 
 
         if type(shop.allowedJobs) == 'table' then 
             for k,v in pairs(shop.allowedJobs) do 
                 if v == xJob then 
-                    openShop(shop)
+                    openShop(shop, xGrade)
                 end 
             end 
         end 
     end)
 end 
 
-function openShop(shop)
-    
+function openShop(shop, xGrade)
+    local categories = {}
+    for k,v in pairs(shop.categories) do 
+
+        local values = {}
+        local args = {}
+
+        getValues(v.vehicles, xGrade)
+        getArgs(v.vehicles, xGrade)
+
+        table.insert(categories, {
+            label = v.label, 
+            values = values, 
+        })
+    end 
+end 
+
+function getValues(vehicles, xGrade)
+    local returnValues = {}
+
+
+
+    return(returnValues)
+end 
+
+function getArgs(vehicles, xGrade)
+
 end 
