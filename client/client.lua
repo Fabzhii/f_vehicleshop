@@ -95,12 +95,44 @@ end
 
 function getValues(vehicles, xGrade)
     local returnValues = {}
-
-
-
+    for k,v in pairs(vehicles) do 
+        if v.grade == nil then 
+            table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+        end 
+        if type(v.grade) == 'number' then 
+            if xGrade >= v.grade then 
+                table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+            end 
+        end 
+        if type(v.grade) == 'table' then 
+            for o, i in pairs(v.grade) do 
+                if i == xGrade then 
+                    table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+                end 
+            end 
+        end 
+    end 
     return(returnValues)
 end 
 
 function getArgs(vehicles, xGrade)
-
+    local returnValues = {}
+    for k,v in pairs(vehicles) do 
+        if v.grade == nil then 
+            table.insert(returnValues, {v.vehicle, v.price})
+        end 
+        if type(v.grade) == 'number' then 
+            if xGrade >= v.grade then 
+                table.insert(returnValues, {v.vehicle, v.price})
+            end 
+        end 
+        if type(v.grade) == 'table' then 
+            for o, i in pairs(v.grade) do 
+                if i == xGrade then 
+                    table.insert(returnValues, {v.vehicle, v.price})
+                end 
+            end 
+        end 
+    end 
+    return(returnValues)
 end 
