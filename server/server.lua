@@ -26,5 +26,21 @@ ESX.RegisterCommand({Config.AdminCommand.command}, Config.AdminCommand.groups, f
     end
 
     TriggerClientEvent('fvehicleshop:openAdminUi', xPlayer.source, playerData)
-    end, false, {help = _U('command_cardel')
+    end, false, {help = 'command_cardel'
 })
+
+ESX.RegisterServerCallback('fvehicleshop:isPlateTaken', function(source, cb, plate)
+    print(plate)
+	MySQL.scalar('SELECT plate FROM owned_vehicles WHERE plate = ?', {plate},
+	function(result)
+		cb(result ~= nil)
+	end)
+end)
+
+RegisterServerEvent('fvehicleshop:writesqlcar')
+AddEventHandler('fvehicleshop:writesqlcar', function(props, plate, job, price)
+    exports.ox_inventory:RemoveItem(source, 'money', price)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle, type, job, stored) VALUES (?, ?, ?, ?, ?, ?)', {xPlayer.identifier, plate, json.encode(props), 'car', job, 0},
+    function() end)
+end)
