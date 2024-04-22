@@ -1,4 +1,7 @@
 
+local ox_inventory = exports.ox_inventory
+local locales = Config.Locales[Config.Language]
+
 local large = {}
 local small = {}
 
@@ -56,12 +59,15 @@ end)
 
 function canOpenShop(shop)
     ESX.TriggerServerCallback('fvehicleshop:getJob', function(xJob, xGrade)
-        if shop.allowedJobs == nil then 
+        local access = false
+        if shop.allowedJobs == nil then
+            access = true  
             openShop(shop, xGrade)
         end 
 
         if type(shop.allowedJobs) == 'string' then 
             if shop.allowedJobs == xJob then 
+                access = true
                 openShop(shop, xGrade)
             end 
         end 
@@ -69,9 +75,14 @@ function canOpenShop(shop)
         if type(shop.allowedJobs) == 'table' then 
             for k,v in pairs(shop.allowedJobs) do 
                 if v == xJob then 
+                    access = true
                     openShop(shop, xGrade)
                 end 
             end 
+        end 
+
+        if not access then 
+            Config.Notifcation(locales['no_access'])
         end 
     end)
 end 
@@ -82,11 +93,12 @@ function openShop(shop, xGrade)
     for k,v in pairs(shop.categories) do 
         table.insert(categories, {
             label = v.label, 
-            values = getValues(v.vehicles, xGrade), 
-            args = getArgs(v.vehicles, xGrade),
+            values, args = getArguments(v.vehicles, xGrade), 
         })
     end 
 
+    TriggerServerEvent('fvehicleshop:setBucket', GetPlayerServerId(PlayerId()))
+    DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
     SetEntityCoords(PlayerPedId(), shop.positions.inside)
     canExit = false
     Citizen.CreateThread(function()
@@ -122,46 +134,39 @@ function openShop(shop, xGrade)
 
 end 
 
-function getValues(vehicles, xGrade)
+function getArguments(vehicles, xGrade)
     local returnValues = {}
+    local returnArgs = {}
     for k,v in pairs(vehicles) do 
         if v.grade == nil then 
             table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+            table.insert(returnArgs, {v.vehicle, v.price})
         end 
         if type(v.grade) == 'number' then 
             if xGrade >= v.grade then 
                 table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+                table.insert(returnArgs, {v.vehicle, v.price})
             end 
         end 
         if type(v.grade) == 'table' then 
             for o, i in pairs(v.grade) do 
                 if i == xGrade then 
                     table.insert(returnValues, (GetLabelText(v.vehicle) .. ' - ' .. v.price .. '$'))
+                    table.insert(returnArgs, {v.vehicle, v.price})
                 end 
             end 
         end 
     end 
-    return(returnValues)
+    return(returnValues, returnArgs)
 end 
 
-function getArgs(vehicles, xGrade)
-    local returnValues = {}
-    for k,v in pairs(vehicles) do 
-        if v.grade == nil then 
-            table.insert(returnValues, {v.vehicle, v.price})
-        end 
-        if type(v.grade) == 'number' then 
-            if xGrade >= v.grade then 
-                table.insert(returnValues, {v.vehicle, v.price})
-            end 
-        end 
-        if type(v.grade) == 'table' then 
-            for o, i in pairs(v.grade) do 
-                if i == xGrade then 
-                    table.insert(returnValues, {v.vehicle, v.price})
-                end 
-            end 
-        end 
-    end 
-    return(returnValues)
-end 
+RegisterNetEvent('fvehicleshop:openAdminUi')
+AddEventHandler('fvehicleshop:openAdminUi', function(playerData)
+
+
+    local input = lib.inputDialog('Dialog title', {
+        {type = 'select', label = locales['admin_player'][1], description = locales['admin_player'][2], options = playerData, required = true},
+        {type = 'input', label = locales['admin_vehicle'][1], description = locales['admin_vehicle'][2], required = true},
+
+      })
+end)

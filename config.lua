@@ -20,7 +20,22 @@ Config.Locations = {
             inside = vector4(0,0,0,0),
             outside = vector4(0,0,0,0),
         },
+        testdrive = {
+            enabled = true,
+            position = vector4(0,0,0,0),
+            time = 30,
+        },
+        buy = {
+            customizeColor = true,
+            customizePlate = true,
+            plate = {
+                minLength = 7, -- only when customizePlate
+                maxLength = 7, -- only when customizePlate
+                format = 'PD ---', -- - = random letter . == random number
+            }
+        },
         allowedJobs = {'police', 'sheriff'}, -- or nil 
+        dbjob = 'police',
         categories = {
             {
                 label = 'Highspeed',
@@ -47,6 +62,9 @@ Config.Locales = {
         ['interact'] = {'[E] - Mit %s interagieren', nil},
         ['no_money'] = {'Du hast nicht genügend Geld dabei!', 'error'},
         ['no_access'] = {'Du hast auf diesen Shop keinen Zugriff!', 'error'},
+
+        ['admin_player'] = {'Spieler', 'Wähle den Spieler der das Fahrzeug bekommt'},
+
     },
     ['EN'] = {
     },
@@ -71,3 +89,8 @@ Config.InfoBar = function(info, toggle)
         lib.hideTextUI()
     end
 end 
+
+Config.AdminCommand = {
+    command = 'givecar',
+    groups = {'admin', 'mod'},
+}
