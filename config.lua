@@ -4,6 +4,7 @@ Config = {}
 Config.Locations = {
     {
         label = 'Polizei Fahrzeughändler',
+        menu_position = 'top-left',
         blip = {
             id = 1,
             color = 1,

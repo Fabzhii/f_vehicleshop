@@ -79,18 +79,33 @@ end
 function openShop(shop, xGrade)
     local categories = {}
     for k,v in pairs(shop.categories) do 
-
-        local values = {}
-        local args = {}
-
-        getValues(v.vehicles, xGrade)
-        getArgs(v.vehicles, xGrade)
-
         table.insert(categories, {
             label = v.label, 
-            values = values, 
+            values = getValues(v.vehicles, xGrade), 
+            args = getArgs(v.vehicles, xGrade),
         })
     end 
+
+    lib.registerMenu({
+        id = 'f_vehicleshop',
+        title = shop.label,
+        position = shop.menu_position,
+        onSideScroll = function(selected, scrollIndex, args)
+            
+        end,
+        onSelected = function(selected, secondary, args)
+
+        end,
+
+        onClose = function(keyPressed)
+
+        end,
+        options = categories,
+    }, function(selected, scrollIndex, args)
+        print(selected, scrollIndex, args)
+    end)
+    lib.showMenu('f_vehicleshop')
+
 end 
 
 function getValues(vehicles, xGrade)
