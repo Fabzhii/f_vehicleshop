@@ -16,14 +16,9 @@ Config.Locations = {
             color = {r = 255, g = 255, b = 255, a = 120},
         },
         positions = {
-            menu = vector3(0,0,0),
-            inside = vector4(0,0,0,0),
-            outside = vector4(0,0,0,0),
-        },
-        testdrive = {
-            enabled = true,
-            position = vector4(0,0,0,0),
-            time = 30,
+            menu = vector3(-57.0939, -1096.8757, 26.4223),
+            inside = vector4(-46.4101, -1096.7626, 26.4223, 202.9519),
+            outside = vector4(-32.2083, -1091.3365, 26.4223, 333.2748),
         },
         buy = {
             customizeColor = true,
@@ -40,7 +35,7 @@ Config.Locations = {
             {
                 label = 'Highspeed',
                 vehicles = {
-                    {vehicle = 'adder', price = 12000, grade = {1, 2}}, -- grade could be nil or a number
+                    {vehicle = 'adder', price = 12000, grade = nil}, -- grade could be nil or a number
                     {vehicle = 'zentorno', price = 12000, grade = nil},
                     {vehicle = 't20', price = 12000, grade = 3},
                 },
@@ -62,7 +57,14 @@ Config.Locales = {
         ['interact'] = {'[E] - Mit %s interagieren', nil},
         ['no_money'] = {'Du hast nicht genügend Geld dabei!', 'error'},
         ['no_access'] = {'Du hast auf diesen Shop keinen Zugriff!', 'error'},
+        ['plate_exists'] = {'Ein Fahrzeug mit diesem Kennzeichen existiert bereits!', 'error'},
+        ['bought'] = {'Du hast das Fahrrzeug erfolgreich gekauft!', 'success'},
 
+        ['buy_menu'] = {'Bist du sicher das du dieses Fahrzeug für %s$ kaufen möchtest?', nil},
+        ['confirm'] = {'Kaufen', nil},
+        ['cancel'] = {'Abbrechen', nil},
+
+        ['configure'] = {'Fahrzeug Konfigurieren', nil},
         ['admin_player'] = {'Spieler', 'Wähle den Spieler der das Fahrzeug bekommt'},
         ['admin_vehicle'] = {'Fahrzeug', 'Wähle das Fahrzeug was der Spieler bekommt'},
         ['admin_plate'] = {'Kennzeichen', 'Wähle das Kennzeichen des Fahrzeugs'},
@@ -73,6 +75,8 @@ Config.Locales = {
     ['EN'] = {
     },
 }
+
+Config.DefaultPlate = 'DEALER'
 
 Config.Notifcation = function(notify)
     local message = notify[1]
