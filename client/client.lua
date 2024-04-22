@@ -167,6 +167,11 @@ AddEventHandler('fvehicleshop:openAdminUi', function(playerData)
     local input = lib.inputDialog('Dialog title', {
         {type = 'select', label = locales['admin_player'][1], description = locales['admin_player'][2], options = playerData, required = true},
         {type = 'input', label = locales['admin_vehicle'][1], description = locales['admin_vehicle'][2], required = true},
-
-      })
+        {type = 'input', label = locales['admin_plate'][1], description = locales['admin_plate'][2], required = true},
+        {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'rgb'},
+        {type = 'checkbox', label = locales['admin_spawn'][1], description = locales['admin_spawn'][2]},
+    })
+    if input ~= nil then 
+        
+    end 
 end)

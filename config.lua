@@ -64,6 +64,10 @@ Config.Locales = {
         ['no_access'] = {'Du hast auf diesen Shop keinen Zugriff!', 'error'},
 
         ['admin_player'] = {'Spieler', 'Wähle den Spieler der das Fahrzeug bekommt'},
+        ['admin_vehicle'] = {'Fahrzeug', 'Wähle das Fahrzeug was der Spieler bekommt'},
+        ['admin_plate'] = {'Kennzeichen', 'Wähle das Kennzeichen des Fahrzeugs'},
+        ['admin_color'] = {'Spieler', 'Wähle die Farbe des Kennzeichens'},
+        ['admin_spawn'] = {'Spawnen', 'Spawne das Fahrzeug beim Spieler'},
 
     },
     ['EN'] = {
