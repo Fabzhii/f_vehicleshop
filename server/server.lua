@@ -38,9 +38,9 @@ ESX.RegisterServerCallback('fvehicleshop:isPlateTaken', function(source, cb, pla
 end)
 
 RegisterServerEvent('fvehicleshop:writesqlcar')
-AddEventHandler('fvehicleshop:writesqlcar', function(props, plate, job, price)
+AddEventHandler('fvehicleshop:writesqlcar', function(id, props, plate, job, price)
     exports.ox_inventory:RemoveItem(source, 'money', price)
-    local xPlayer = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(id)
     MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle, type, job, stored) VALUES (?, ?, ?, ?, ?, ?)', {xPlayer.identifier, plate, json.encode(props), 'car', job, 0},
     function() end)
 end)

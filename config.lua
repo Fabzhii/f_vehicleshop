@@ -69,6 +69,7 @@ Config.Locales = {
         ['admin_vehicle'] = {'Fahrzeug', 'Wähle das Fahrzeug was der Spieler bekommt'},
         ['admin_plate'] = {'Kennzeichen', 'Wähle das Kennzeichen des Fahrzeugs'},
         ['admin_color'] = {'Spieler', 'Wähle die Farbe des Kennzeichens'},
+        ['admin_dbjob'] = {'Job', 'Wähle den Datenbank Job des Fahrzeugs'},
         ['admin_spawn'] = {'Spawnen', 'Spawne das Fahrzeug beim Spieler'},
 
     },

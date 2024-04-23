@@ -167,7 +167,7 @@ function openShop(shop, xGrade)
 
                 local vehicleProps = ESX.Game.GetVehicleProperties(GetVehiclePedIsIn(PlayerPedId(), false))
                 local platetext = vehicleProps.plate
-                -- TriggerServerEvent('fvehicleshop:writesqlcar', vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
+                TriggerServerEvent('fvehicleshop:writesqlcar', GetPlayerServerId(PlayerId()) vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
                 DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
                 SetEntityCoords(PlayerPedId(), shop.positions.outside)
                 TriggerServerEvent('fvehicleshop:setBucket', GetPlayerServerId(PlayerId()))
@@ -229,10 +229,41 @@ AddEventHandler('fvehicleshop:openAdminUi', function(playerData)
         {type = 'input', label = locales['admin_vehicle'][1], description = locales['admin_vehicle'][2], required = true},
         {type = 'input', label = locales['admin_plate'][1], description = locales['admin_plate'][2], required = true},
         {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'hex'},
+        {type = 'input', label = locales['admin_dbjob'][1], description = locales['admin_dbjob'][2], required = true},
         {type = 'checkbox', label = locales['admin_spawn'][1], description = locales['admin_spawn'][2]},
     })
     if input ~= nil then 
-        
+
+        local hex = input[4]
+        local hex = hex:gsub("#","")
+        local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+
+        if input[6] then 
+            ESX.Game.SpawnVehicle(input[2], GetEntityCoords(PlayerPedId()), GetEntityHeading(PlayerPedId()), function(vehicle)
+                Citizen.Wait(5)
+                SetVehicleCustomPrimaryColour(vehicle, r,g,b)
+                SetVehicleNumberPlateText(vehicle, input[3])
+                Citizen.Wait(5)
+                local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
+                local platetext = vehicleProps.plate
+                TriggerServerEvent('fvehicleshop:writesqlcar', tonumber(input[1]), vehicleProps, platetext, input[5], 0)
+            end)
+        else 
+            local pedCoords = GetEntityCoords(PlayerPedId())
+            local coords = vector3(pedCoords.x, pedCoords.y, pedCoords.z + 10)
+            ESX.Game.SpawnVehicle(input[2], coords, GetEntityHeading(PlayerPedId()), function(vehicle)
+                Citizen.Wait(5)
+                SetVehicleCustomPrimaryColour(vehicle, r,g,b)
+                SetVehicleNumberPlateText(vehicle, input[3])
+                Citizen.Wait(5)
+                local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
+                local platetext = vehicleProps.plate
+                TriggerServerEvent('fvehicleshop:writesqlcar', tonumber(input[1]), vehicleProps, platetext, input[5], 0)
+                Citizen.Wait(5)
+                DeleteVehicle(vehicle)
+            end)
+        end
+
     end 
 end)
 
