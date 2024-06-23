@@ -167,7 +167,7 @@ function openShop(shop, xGrade)
 
                 local vehicleProps = ESX.Game.GetVehicleProperties(GetVehiclePedIsIn(PlayerPedId(), false))
                 local platetext = vehicleProps.plate
-                TriggerServerEvent('fvehicleshop:writesqlcar', GetPlayerServerId(PlayerId()) vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
+                TriggerServerEvent('fvehicleshop:writesqlcar', GetPlayerServerId(PlayerId()), vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
                 DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
                 SetEntityCoords(PlayerPedId(), shop.positions.outside)
                 TriggerServerEvent('fvehicleshop:setBucket', GetPlayerServerId(PlayerId()))
