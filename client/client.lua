@@ -351,8 +351,8 @@ function GetSettings(shop)
     end 
 
     if IsPlateTaken(returnSettings[2]) then 
+	Config.Notifcation(locales['plate_exists'])
         return(GetSettings(shop))
-        Config.Notifcation(locales['plate_exists'])
     end
     return(returnSettings)
 end 
