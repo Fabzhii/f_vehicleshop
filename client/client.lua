@@ -170,7 +170,7 @@ function openShop(shop, xGrade)
                 TriggerServerEvent('fvehicleshop:writesqlcar', GetPlayerServerId(PlayerId()), vehicleProps, platetext, shop.dbjob, args[scrollIndex][2])
                 DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
                 SetEntityCoords(PlayerPedId(), shop.positions.outside)
-                TriggerServerEvent('fvehicleshop:setBucket', GetPlayerServerId(PlayerId()))
+                TriggerServerEvent('fvehicleshop:setBucket', 0)
                 canExit = true 
                 ESX.Game.SpawnVehicle(vehicleProps.model, shop.positions.outside, shop.positions.outside.w, function(vehicle)
                     ESX.Game.SetVehicleProperties(vehicle, vehicleProps)
@@ -180,7 +180,7 @@ function openShop(shop, xGrade)
             else 
                 lib.hideMenu(false)
                 DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
-                buyVehicles(marker, grade)
+                openShop(shop, xGrade)
             end 
         else 
             lib.hideMenu(false)
