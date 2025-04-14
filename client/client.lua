@@ -157,13 +157,14 @@ function openShop(shop, xGrade)
 
                 local settings = GetSettings(shop)
 
-                local hex = settings[1]
-                local hex = hex:gsub("#","")
-                local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+		if settings ~= {} then 
+	            local hex = settings[1]
+	            local hex = hex:gsub("#","")
+	            local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
 
-
-                SetVehicleCustomPrimaryColour(GetVehiclePedIsIn(PlayerPedId(), false), r,g,b)
-                SetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false), settings[2])
+		    SetVehicleCustomPrimaryColour(GetVehiclePedIsIn(PlayerPedId(), false), r,g,b)
+                    SetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false), settings[2])
+		end 
 
                 local vehicleProps = ESX.Game.GetVehicleProperties(GetVehiclePedIsIn(PlayerPedId(), false))
                 local platetext = vehicleProps.plate
