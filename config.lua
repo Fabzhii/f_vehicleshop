@@ -98,8 +98,3 @@ Config.InfoBar = function(info, toggle)
         lib.hideTextUI()
     end
 end 
-
-Config.AdminCommand = {
-    command = 'givecar',
-    groups = {'admin', 'mod'},
-}
