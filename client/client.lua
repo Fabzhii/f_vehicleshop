@@ -156,15 +156,19 @@ function openShop(shop, xGrade)
             if alert == 'confirm' then 
 
                 local settings = GetSettings(shop)
+		        if json.encode(settings) ~= '[]' then 
 
-		if settings ~= {} then 
-	            local hex = settings[1]
-	            local hex = hex:gsub("#","")
-	            local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+                    if settings.color then 
+                        local hex = settings.color
+                        local hex = hex:gsub("#","")
+                        local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+                        SetVehicleCustomPrimaryColour(GetVehiclePedIsIn(PlayerPedId(), false), r,g,b)
+                    end 
 
-		    SetVehicleCustomPrimaryColour(GetVehiclePedIsIn(PlayerPedId(), false), r,g,b)
-                    SetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false), settings[2])
-		end 
+                    if settings.plate then
+                        SetVehicleNumberPlateText(GetVehiclePedIsIn(PlayerPedId(), false), settings.plate)
+                    end 
+		        end 
 
                 local vehicleProps = ESX.Game.GetVehicleProperties(GetVehiclePedIsIn(PlayerPedId(), false))
                 local platetext = vehicleProps.plate
@@ -221,52 +225,6 @@ function getArguments(vehicles, xGrade)
 
     return({returnValues, returnArgs})
 end 
-
-RegisterNetEvent('fvehicleshop:openAdminUi')
-AddEventHandler('fvehicleshop:openAdminUi', function(playerData)
-
-    local input = lib.inputDialog(locales['configure'][1], {
-        {type = 'select', label = locales['admin_player'][1], description = locales['admin_player'][2], options = playerData, required = true},
-        {type = 'input', label = locales['admin_vehicle'][1], description = locales['admin_vehicle'][2], required = true},
-        {type = 'input', label = locales['admin_plate'][1], description = locales['admin_plate'][2], required = true},
-        {type = 'color', label = locales['admin_color'][1], description = locales['admin_color'][2], required = true, format = 'hex'},
-        {type = 'input', label = locales['admin_dbjob'][1], description = locales['admin_dbjob'][2], required = true},
-        {type = 'checkbox', label = locales['admin_spawn'][1], description = locales['admin_spawn'][2]},
-    })
-    if input ~= nil then 
-
-        local hex = input[4]
-        local hex = hex:gsub("#","")
-        local r,g,b = tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
-
-        if input[6] then 
-            ESX.Game.SpawnVehicle(input[2], GetEntityCoords(PlayerPedId()), GetEntityHeading(PlayerPedId()), function(vehicle)
-                Citizen.Wait(5)
-                SetVehicleCustomPrimaryColour(vehicle, r,g,b)
-                SetVehicleNumberPlateText(vehicle, input[3])
-                Citizen.Wait(5)
-                local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
-                local platetext = vehicleProps.plate
-                TriggerServerEvent('fvehicleshop:writesqlcar', tonumber(input[1]), vehicleProps, platetext, input[5], 0)
-            end)
-        else 
-            local pedCoords = GetEntityCoords(PlayerPedId())
-            local coords = vector3(pedCoords.x, pedCoords.y, pedCoords.z + 10)
-            ESX.Game.SpawnVehicle(input[2], coords, GetEntityHeading(PlayerPedId()), function(vehicle)
-                Citizen.Wait(5)
-                SetVehicleCustomPrimaryColour(vehicle, r,g,b)
-                SetVehicleNumberPlateText(vehicle, input[3])
-                Citizen.Wait(5)
-                local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
-                local platetext = vehicleProps.plate
-                TriggerServerEvent('fvehicleshop:writesqlcar', tonumber(input[1]), vehicleProps, platetext, input[5], 0)
-                Citizen.Wait(5)
-                DeleteVehicle(vehicle)
-            end)
-        end
-
-    end 
-end)
 
 function spawncar(car, pos, bucket, buySettings)
     local ModelHash = car
@@ -348,7 +306,19 @@ function GetSettings(shop)
         end 
 
         local input = lib.inputDialog(locales['configure'][1], settings, {allowCancel = false})
-        returnSettings = input
+        
+        if shop.buy.customizeColor and not shop.buy.customizePlate then 
+            returnSettings.color = input[1]
+        end 
+
+        if shop.buy.customizePlate and not shop.buy.customizeColor then 
+            returnSettings.plate = input[1]
+        end 
+
+        if shop.buy.customizeColor and shop.buy.customizePlate then 
+            returnSettings.color = input[1]
+            returnSettings.plate = input[2]
+        end 
     end 
 
     if IsPlateTaken(returnSettings[2]) then 
