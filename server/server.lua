@@ -14,23 +14,7 @@ AddEventHandler('fvehicleshop:setEntityBucket', function(entity, bucket)
     SetEntityRoutingBucket(NetworkGetEntityFromNetworkId(entity), bucket)
 end)
 
-ESX.RegisterCommand({Config.AdminCommand.command}, Config.AdminCommand.groups, function(xPlayer, args, showError)
-
-    local playerData = {}
-    for k,v in pairs(ESX.GetPlayers()) do
-        local xPlayer = ESX.GetPlayerFromId(v)
-        table.insert(playerData, {
-            label = xPlayer.getName(),
-            value = xPlayer.source,
-        })
-    end
-
-    TriggerClientEvent('fvehicleshop:openAdminUi', xPlayer.source, playerData)
-    end, false, {help = 'command_cardel'
-})
-
 ESX.RegisterServerCallback('fvehicleshop:isPlateTaken', function(source, cb, plate)
-    print(plate)
 	MySQL.scalar('SELECT plate FROM owned_vehicles WHERE plate = ?', {plate},
 	function(result)
 		cb(result ~= nil)
@@ -43,4 +27,8 @@ AddEventHandler('fvehicleshop:writesqlcar', function(id, props, plate, job, pric
     local xPlayer = ESX.GetPlayerFromId(id)
     MySQL.insert('INSERT INTO owned_vehicles (owner, plate, vehicle, type, job, stored) VALUES (?, ?, ?, ?, ?, ?)', {xPlayer.identifier, plate, json.encode(props), 'car', job, 0},
     function() end)
+end)
+
+RegisterCommand('getBucket',function(source, args, rawCommand)
+    print(GetPlayerRoutingBucket(source))
 end)
